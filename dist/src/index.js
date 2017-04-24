@@ -5,7 +5,7 @@ require("reflect-metadata");
 exports.REFLECT_METADATA_SCHEMA = 'normalizr.schema';
 exports.REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES = 'normalizr.entity.properties';
 exports.REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES = 'normalizr.array.properties';
-const EntityClassDecorator = (params) => {
+const entityClassDecorator = (params) => {
     const { key, options } = params;
     return (target) => {
         const schema = new normalizr.schema.Entity(key, {}, options);
@@ -14,7 +14,7 @@ const EntityClassDecorator = (params) => {
         return target;
     };
 };
-const EntityPropertyDecorator = () => {
+const entityPropertyDecorator = () => {
     return (target, propertyKey) => {
         const properties = Reflect.getMetadata(exports.REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, target.constructor) || [];
         properties.push(propertyKey);
@@ -24,7 +24,7 @@ const EntityPropertyDecorator = () => {
         Reflect.defineMetadata(exports.REFLECT_METADATA_SCHEMA, { schema, target: propertyTarget }, target.constructor, propertyKey);
     };
 };
-const ArrayPropertyDecorator = (elementTarget) => {
+const arrayPropertyDecorator = (elementTarget) => {
     return (target, propertyKey) => {
         const properties = Reflect.getMetadata(exports.REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, target.constructor) || [];
         properties.push(propertyKey);
@@ -51,9 +51,9 @@ const defineArrayProperties = (parentSchema, parentTarget, propertyKey) => {
     parentSchema.define({ [propertyKey]: [schema] });
     define(target);
 };
-exports.Entity = (params) => EntityClassDecorator(params);
-exports.EntityProperty = () => EntityPropertyDecorator();
-exports.ArrayProperty = (elementTarget) => ArrayPropertyDecorator(elementTarget);
+exports.Entity = (params) => entityClassDecorator(params);
+exports.EntityProperty = () => entityPropertyDecorator();
+exports.ArrayProperty = (elementTarget) => arrayPropertyDecorator(elementTarget);
 exports.normalize = (data, target) => normalizr.normalize(data, define(target));
 exports.denormalize = (input, target, entities) => normalizr.denormalize(input, define(target), entities);
 //# sourceMappingURL=index.js.map

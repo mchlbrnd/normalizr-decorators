@@ -3,15 +3,20 @@ import 'reflect-metadata';
 export declare const REFLECT_METADATA_SCHEMA: string;
 export declare const REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES: string;
 export declare const REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES: string;
-export interface EntitySignature {
+export interface EntityParams {
     key: string;
     options?: normalizr.schema.EntityOptions;
 }
-export declare type Entity = (params: EntitySignature) => ClassDecorator;
-export declare const Entity: Entity;
-export declare type EntityProperty = () => PropertyDecorator;
-export declare const EntityProperty: EntityProperty;
-export declare type ArrayProperty = (elementTarget: any) => PropertyDecorator;
-export declare const ArrayProperty: ArrayProperty;
-export declare const normalize: any;
-export declare const denormalize: any;
+export declare type EntityClassDecorator = (params: EntityParams) => ClassDecorator;
+export declare type EntityPropertyDecorator = () => PropertyDecorator;
+export declare type ArrayPropertyDecorator = (elementTarget: any) => PropertyDecorator;
+export declare type NormalizeSignature = (data: any, target: any) => {
+    entities: any;
+    result: any;
+};
+export declare type DenormalizeSignature = (input: any, target: any, entities: any) => any;
+export declare const Entity: EntityClassDecorator;
+export declare const EntityProperty: EntityPropertyDecorator;
+export declare const ArrayProperty: ArrayPropertyDecorator;
+export declare const normalize: NormalizeSignature;
+export declare const denormalize: DenormalizeSignature;
