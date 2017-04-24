@@ -1,0 +1,52 @@
+{
+  "name": "normalizr-decorators",
+  "version": "0.0.0",
+  "description": "Schema decorators for normalizr",
+  "engineStrict": true,
+  "engines": {
+    "node": ">= 6.9.0"
+  },
+  "devDependencies": {
+    "@types/jest": "~19.2.2",
+    "@types/node": "~6.0.65",
+    "jest": "~19.0.2",
+    "rimraf": "~2.6.1",
+    "tslint": "~4.5.1",
+    "tslint-microsoft-contrib": "~4.0.0",
+    "typescript": "~2.2.2"
+  },
+  "scripts": {
+    "clean": "rimraf coverage build tmp",
+    "build": "tsc -p tsconfig.release.json",
+    "watch": "tsc -w -p tsconfig.release.json",
+    "lint": "tslint -t stylish '{src,__tests__}/**/*.{ts,tsx}'",
+    "pretest": "npm run lint",
+    "test": "npm run test-only",
+    "test-only": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "author": "Michael Wolbert <michael.wolbert@werockit.nl>",
+  "license": "MIT",
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/preprocessor.js"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx"
+    ],
+    "testRegex": "<rootDir>(__tests__/).*\\.(test|spec)\\.(ts|js)$",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx,js,jsx}",
+      "!src/**/*.d.ts"
+    ]
+  },
+  "dependencies": {
+    "normalizr": "^3.2.2",
+    "tslib": "~1.6.0"
+  }
+}
