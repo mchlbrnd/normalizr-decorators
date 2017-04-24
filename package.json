@@ -1,19 +1,36 @@
 {
   "name": "normalizr-decorators",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "Schema decorators for normalizr",
+  "author": "Michael Wolbert <michael.wolbert@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/mchlbrnd/normalizr-decorators/issues"
+  },
+  "homepage": "https://github.com/mchlbrnd/normalizr-decorators",
+  "repository": {
+    "url": "https://github.com/mchlbrnd/normalizr-decorators.git",
+    "type": "git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "decorator",
+    "reflect",
+    "flux",
+    "redux",
+    "normalize",
+    "denormalize",
+    "api",
+    "json"
+  ],
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "dist/src/index.js",
   "engineStrict": true,
   "engines": {
     "node": ">= 6.9.0"
-  },
-  "devDependencies": {
-    "@types/jest": "~19.2.2",
-    "@types/node": "~6.0.65",
-    "jest": "~19.0.2",
-    "rimraf": "~2.6.1",
-    "tslint": "~4.5.1",
-    "tslint-microsoft-contrib": "~4.0.0",
-    "typescript": "~2.2.2"
   },
   "scripts": {
     "clean": "rimraf coverage build tmp",
@@ -25,8 +42,6 @@
     "test-only": "jest --coverage",
     "test:watch": "jest --watch"
   },
-  "author": "Michael Wolbert <michael.wolbert@werockit.nl>",
-  "license": "MIT",
   "jest": {
     "testEnvironment": "node",
     "transform": {
@@ -44,6 +59,15 @@
       "src/**/*.{ts,tsx,js,jsx}",
       "!src/**/*.d.ts"
     ]
+  },
+  "devDependencies": {
+    "@types/jest": "~19.2.2",
+    "@types/node": "~6.0.65",
+    "jest": "~19.0.2",
+    "rimraf": "~2.6.1",
+    "tslint": "~4.5.1",
+    "tslint-microsoft-contrib": "~4.0.0",
+    "typescript": "~2.2.2"
   },
   "dependencies": {
     "normalizr": "^3.2.2",
