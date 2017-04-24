@@ -29,7 +29,7 @@
       * common bug patterns in the code or enforce type safety.
       */
     "forin": true,
-    "no-any": true,
+    "no-any": false,
     "no-arg": true,
     "no-bitwise": true,
     "no-conditional-assignment": true,
@@ -53,7 +53,7 @@
     "no-unsafe-finally": true,
     "no-unused-expression": true,
     "no-unused-new": true,
-    "no-use-before-declare": true,
+    "no-use-before-declare": false,
     "no-with-statement": true,
     "promise-must-complete": true,
     "radix": true,
@@ -76,7 +76,7 @@
     "export-name": false,
     "function-name": true,
     "import-name": false,
-    "interface-name": [true, "always-prefix"],
+    "interface-name": [false, "never-prefix"],
     "jsdoc-format": true,
     "max-classes-per-file": [true, 3],  // we generally recommend making one public class per file
     "max-file-line-count": [true, 500],
@@ -115,7 +115,7 @@
     "typedef": [true, "call-signature", "parameter", "property-declaration", "variable-declaration", "member-variable-declaration"],
     "underscore-consistent-invocation": true,
     "unified-signatures": true,
-    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore", "allow-pascal-case"],
 
     /**
       * Whitespace related rules. The only recommended whitespace strategy is to pick a single format and

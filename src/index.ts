@@ -1,85 +1,89 @@
 import * as normalizr from 'normalizr';
 import 'reflect-metadata';
 
-export const REFLECT_METADATA_SCHEMA = 'normalizr.schema';
-export const REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES = 'normalizr.entity.properties';
-export const REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES = 'normalizr.array.properties';
+export const REFLECT_METADATA_SCHEMA: string = 'normalizr.schema';
+export const REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES: string = 'normalizr.entity.properties';
+export const REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES: string = 'normalizr.array.properties';
 
-export interface EntitySignature {
-  key: string
-  options?: normalizr.schema.EntityOptions
-}
+type EntityClassDecorator = (params: EntitySignature) => ClassDecorator;
+type EntityTarget = {schema: normalizr.Schema, target: any};
 
-export const Entity = (params: EntitySignature): ClassDecorator =>
-  EntityClassDecorator(params);
-
-export const EntityProperty = (): PropertyDecorator =>
-  EntityPropertyDecorator();
-
-export const ArrayProperty = (type: Function): PropertyDecorator =>
-  ArrayPropertyDecorator(type);
-
-export const normalize = (data: any, target: any): {entities: any, result: any} =>
-  normalizr.normalize(data, define(target));
-
-export const denormalize = (input: any, target: any, entities: any): any =>
-  normalizr.denormalize(input, define(target), entities);
-
-const EntityClassDecorator = (params: EntitySignature): ClassDecorator => {
+const EntityClassDecorator: EntityClassDecorator = (params: EntitySignature): ClassDecorator => {
   const {key, options} = params;
-  return function (target: any) {
-    const metadataValue = {
-      schema: new normalizr.schema.Entity(key, {}, options),
-      type: target
-    };
+  return (target: any) => {
+    const schema: normalizr.Schema = new normalizr.schema.Entity(key, {}, options);
+    const metadataValue: EntityTarget = {schema, target};
     Reflect.defineMetadata(REFLECT_METADATA_SCHEMA, metadataValue, target);
     return target;
   };
 };
 
-const EntityPropertyDecorator = (): PropertyDecorator => {
-  return function (target: any, propertyKey: string | symbol): void {
-    const properties = (Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, target.constructor) || []).concat(propertyKey);
-    const propertyType = Reflect.getMetadata('design:type', target, propertyKey);
-    const {schema} = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, propertyType);
+type EntityPropertyDecorator = () => PropertyDecorator;
+const EntityPropertyDecorator: EntityPropertyDecorator = (): PropertyDecorator => {
+  return (target: any, propertyKey: string | symbol): void => {
+    const properties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, target.constructor) || [];
+    properties.push(propertyKey);
+    const propertyTarget: any = Reflect.getMetadata('design:type', target, propertyKey);
+    const {schema}: EntityTarget = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, propertyTarget);
     Reflect.defineMetadata(REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, properties, target.constructor);
-    Reflect.defineMetadata(REFLECT_METADATA_SCHEMA, {schema, type: propertyType}, target.constructor, propertyKey);
+    Reflect.defineMetadata(REFLECT_METADATA_SCHEMA, {schema, target: propertyTarget}, target.constructor, propertyKey);
   };
 };
 
-const ArrayPropertyDecorator = (type: any) => {
-  return function (target: any, propertyKey: string | symbol): void {
-    const properties = (Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, target.constructor) || []).concat(propertyKey);
-    const {schema} = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, type);
+type ArrayPropertyDecorator = (elementTarget: any) => (target: any, propertyKey: string | symbol) => void;
+const ArrayPropertyDecorator: ArrayPropertyDecorator = (elementTarget: any) => {
+  return (target: any, propertyKey: string | symbol): void => {
+    const properties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, target.constructor) || [];
+    properties.push(propertyKey);
+    const {schema}: EntityTarget = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, elementTarget);
     Reflect.defineMetadata(REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, properties, target.constructor);
-    Reflect.defineMetadata(REFLECT_METADATA_SCHEMA, {schema, type: type}, target.constructor, propertyKey);
+    Reflect.defineMetadata(REFLECT_METADATA_SCHEMA, {schema, target: elementTarget}, target.constructor, propertyKey);
   };
 };
 
-const defineEntityProperties = (parentSchema: any, target: any, propertyKey: string | symbol): void => {
-  const {schema, type} = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, target, propertyKey);
-  parentSchema.define({
-    [propertyKey]: schema
-  });
-  define(type);
-};
+type DefineTargetSignature = (target: any) => normalizr.Schema;
+const define: DefineTargetSignature = (target: any): normalizr.Schema => {
+  const {schema}: EntityTarget = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, target);
 
-const defineArrayProperties = (parentSchema: any, target: any, propertyKey: string | symbol): void => {
-  const {schema, type} = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, target, propertyKey);
-  parentSchema.define({
-    [propertyKey]: new normalizr.schema.Array(schema)
-  });
-  define(type);
-};
+  const entityProperties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, target) || [];
+  entityProperties.forEach((propertyKey: string | symbol) => defineEntityProperties(schema, target, propertyKey));
 
-const define = (target: any): normalizr.Schema => {
-  const {schema} = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, target);
-
-  (Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, target) || [])
-    .forEach(propertyKey => defineEntityProperties(schema, target, propertyKey));
-
-  (Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, target) || [])
-    .forEach(propertyKey => defineArrayProperties(schema, target, propertyKey));
+  const arrayProperties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, target) || [];
+  arrayProperties.forEach((propertyKey: string | symbol) => defineArrayProperties(schema, target, propertyKey));
 
   return schema;
 };
+
+type DefineTargetPropertySignature = (parentSchema: any, parentTarget: any, propertyKey: string | symbol) => void;
+
+const defineEntityProperties: DefineTargetPropertySignature =
+  (parentSchema: any, parentTarget: any, propertyKey: string | symbol): void => {
+    const {schema, target} = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, parentTarget, propertyKey);
+    parentSchema.define({[propertyKey]: schema});
+    define(target);
+};
+
+const defineArrayProperties: DefineTargetPropertySignature =
+  (parentSchema: any, parentTarget: any, propertyKey: string | symbol): void => {
+    let {schema, target} = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, parentTarget, propertyKey);
+    parentSchema.define({[propertyKey]: [schema]});
+    define(target);
+};
+
+export interface EntitySignature {
+  key: string;
+  options?: normalizr.schema.EntityOptions;
+}
+
+export type Entity = (params: EntitySignature) => ClassDecorator;
+export const Entity: Entity = (params: EntitySignature): ClassDecorator => EntityClassDecorator(params);
+
+export type EntityProperty = () => PropertyDecorator;
+export const EntityProperty: EntityProperty = (): PropertyDecorator => EntityPropertyDecorator();
+
+export type ArrayProperty = (elementTarget: any) => PropertyDecorator;
+export const ArrayProperty: ArrayProperty = (elementTarget: any): PropertyDecorator => ArrayPropertyDecorator(elementTarget);
+
+export const normalize: any = (data: any, target: any): {entities: any, result: any} => normalizr.normalize(data, define(target));
+
+export const denormalize: any = (input: any, target: any, entities: any): any => normalizr.denormalize(input, define(target), entities);

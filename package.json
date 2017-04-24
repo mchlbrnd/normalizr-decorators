@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@types/jest": "~19.2.2",
-    "@types/node": "~6.0.65",
+    "@types/node": "~6.0.70",
     "jest": "~19.0.2",
     "rimraf": "~2.6.1",
     "tslint": "~4.5.1",
@@ -71,6 +71,7 @@
   },
   "dependencies": {
     "normalizr": "^3.2.2",
+    "reflect-metadata": "^0.1.10",
     "tslib": "~1.6.0"
   }
 }
