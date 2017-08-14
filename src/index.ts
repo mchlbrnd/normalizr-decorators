@@ -19,7 +19,7 @@ export type EntityClassDecorator = (params: EntityParams) => ClassDecorator;
 export type EntityPropertyDecorator = () => PropertyDecorator;
 export type ArrayPropertyDecorator = (elementTarget: any) => PropertyDecorator;
 
-type DefineTargetSignature = (target: any) => normalizr.Schema;
+export type DefineTargetSignature = (target: any) => normalizr.Schema;
 type DefineTargetPropertySignature = (parentSchema: any, parentTarget: any, propertyKey: string | symbol) => void;
 
 export type NormalizeSignature = (data: any, target: any) => {entities: any, result: any};
@@ -56,16 +56,18 @@ const arrayPropertyDecorator: ArrayPropertyDecorator = (elementTarget: any) => {
   };
 };
 
-const define: DefineTargetSignature = (target: any): normalizr.Schema => {
-  const {schema}: SchemaTarget = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, target);
+export const define: DefineTargetSignature = (target: any | [any]): normalizr.Schema => {
+  const isArray = target instanceof Array;
+  const unwrapped = isArray ? target[0] : target;
+  const {schema}: SchemaTarget = Reflect.getMetadata(REFLECT_METADATA_SCHEMA, unwrapped);
 
-  const entityProperties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, target) || [];
-  entityProperties.forEach((propertyKey: string | symbol) => defineEntityProperties(schema, target, propertyKey));
+  const entityProperties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ENTITY_PROPERTIES, unwrapped) || [];
+  entityProperties.forEach((propertyKey: string | symbol) => defineEntityProperties(schema, unwrapped, propertyKey));
 
-  const arrayProperties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, target) || [];
-  arrayProperties.forEach((propertyKey: string | symbol) => defineArrayProperties(schema, target, propertyKey));
+  const arrayProperties: (string | symbol)[] = Reflect.getMetadata(REFLECT_METADATA_SCHEMA_ARRAY_PROPERTIES, unwrapped) || [];
+  arrayProperties.forEach((propertyKey: string | symbol) => defineArrayProperties(schema, unwrapped, propertyKey));
 
-  return schema;
+  return isArray ? new normalizr.schema.Array(schema) : schema;
 };
 
 const defineEntityProperties: DefineTargetPropertySignature =
@@ -82,12 +84,19 @@ const defineArrayProperties: DefineTargetPropertySignature =
     define(target);
 };
 
-export const Entity: EntityClassDecorator = (params: EntityParams): ClassDecorator => entityClassDecorator(params);
-export const EntityProperty: EntityPropertyDecorator = (): PropertyDecorator => entityPropertyDecorator();
-export const ArrayProperty: ArrayPropertyDecorator = (elementTarget: any): PropertyDecorator => arrayPropertyDecorator(elementTarget);
+export function Entity(params: EntityParams):ClassDecorator {
+  return entityClassDecorator(params);
+}
+export function EntityProperty():PropertyDecorator {
+  return entityPropertyDecorator();
+}
+export function ArrayProperty(elementTarget: any):PropertyDecorator {
+  return arrayPropertyDecorator(elementTarget);
+}
 
-export const normalize: NormalizeSignature = (data: any, target: any): {entities: any, result: any} =>
-  normalizr.normalize(data, define(target));
-
-export const denormalize: DenormalizeSignature = (input: any, target: any, entities: any): any =>
-  normalizr.denormalize(input, define(target), entities);
+export function normalize(data: any, target: any): {entities: any, result: any} {
+  return normalizr.normalize(data, define(target));
+}
+export function denormalize(input: any, target: any, entities: any): any {
+  return normalizr.denormalize(input, define(target), entities);
+}

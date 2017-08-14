@@ -3,12 +3,11 @@
   "compilerOptions": {
     "sourceMap": true,
     "declaration": true,
-    "rootDir": ".",
     "outDir": "dist",
     "removeComments": true,
     "jsx": "react"
   },
   "include": [
-    "src/**/*"
+    "src/index.ts"
   ]
 }
