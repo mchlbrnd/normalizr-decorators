@@ -84,13 +84,13 @@ const defineArrayProperties: DefineTargetPropertySignature =
     define(target);
 };
 
-export function Entity(params: EntityParams):ClassDecorator {
+export function Entity(params: EntityParams): ClassDecorator {
   return entityClassDecorator(params);
 }
-export function EntityProperty():PropertyDecorator {
+export function EntityProperty(): PropertyDecorator {
   return entityPropertyDecorator();
 }
-export function ArrayProperty(elementTarget: any):PropertyDecorator {
+export function ArrayProperty(elementTarget: any): PropertyDecorator {
   return arrayPropertyDecorator(elementTarget);
 }
 
