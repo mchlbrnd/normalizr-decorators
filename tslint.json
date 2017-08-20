@@ -74,7 +74,7 @@
     "class-name": true,
     "comment-format": [true, "check-space", "check-uppercase"],
     "export-name": false,
-    "function-name": true,
+    "function-name": false,
     "import-name": false,
     "interface-name": [false, "never-prefix"],
     "jsdoc-format": true,

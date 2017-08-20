@@ -1,17 +1,27 @@
 import * as normalizr from 'normalizr';
-import { ArrayProperty, denormalize, Entity, EntityProperty, normalize } from '../index';
-import { normalize as $normalize, denormalize as $denormalize } from "normalizr";
+import { ArrayProperty, denormalize, Entity, EntityProperty, normalize, UnionProperty } from '../index';
+import { denormalize as $denormalize, normalize as $normalize } from 'normalizr';
 
 // Setup normalization through existing normalizr API
 const user: normalizr.Schema = new normalizr.schema.Entity('users');
+const group: normalizr.Schema = new normalizr.schema.Entity('groups');
 const comment: normalizr.Schema = new normalizr.schema.Entity('comments', {commenter: user});
-const article: normalizr.Schema = new normalizr.schema.Entity('articles', {author: user, comments: [ comment ]});
+const ownerWithUser: normalizr.Schema = new normalizr.schema.Union({user, group}, 'type');
+const ownerWithGroup: normalizr.Schema = new normalizr.schema.Union({user, group}, 'type');
+const article: normalizr.Schema = new normalizr.schema.Entity('articles', {author: user, comments: [comment], ownerWithUser, ownerWithGroup});
 const articles: normalizr.Schema = new normalizr.schema.Array(article);
 
 // Decorated classes and props to normalize
 @Entity({key: 'users'})
 class User {
   public readonly id: number;
+  public type: string;
+}
+
+@Entity({key: 'groups'})
+class Group {
+  public readonly id: number;
+  public type: string;
 }
 
 @Entity({key: 'comments'})
@@ -31,15 +41,22 @@ class Article {
 
   @ArrayProperty(Comment)
   public comments: Comment[];
+
+  @UnionProperty({user: User, group: Group, schemaAttribute: 'type'})
+  public ownerWithUser: User[] | Group[];
+
+  @UnionProperty({user: User, group: Group, schemaAttribute: 'type'})
+  public ownerWithGroup: User[] | Group[];
 }
 
 const originalData: any = {
   id: 123,
+  title: 'My awesome blog post',
   author: {
     id: 1,
     name: 'Paul',
+    type: 'user',
   },
-  title: 'My awesome blog post',
   comments: [
     {
       id: 324,
@@ -49,6 +66,16 @@ const originalData: any = {
       },
     },
   ],
+  ownerWithUser: {
+    id: 2,
+    name: 'John',
+    type: 'user',
+  },
+  ownerWithGroup: {
+    id: 42,
+    name: 'LIFE',
+    type: 'group',
+  },
 };
 
 let normalizedData: any;
@@ -88,6 +115,21 @@ describe('Array', () => {
   describe('denormalize with decorated class', () =>
     test('to equal denormalized data returned by normalizr.deqnormalize', () =>
       expect(denormalizedData).toEqual(expectedDenormalizedData)));
-})
+});
 
+describe('Union', () => {
+  beforeEach(() => {
+    const {result, entities} = normalizedData = normalize(originalData, Article);
+    expectedNormalizedData = $normalize(originalData, article);
+    denormalizedData = denormalize(result, Article, entities);
+    expectedDenormalizedData = $denormalize(result, article, entities);
+  });
 
+  describe('normalize with decorated class', () =>
+    test('to equal normalized data returned by normalizr.normalize', () =>
+      expect(normalizedData).toEqual(expectedNormalizedData)));
+
+  describe('denormalize with decorated class', () =>
+    test('to equal denormalized data returned by normalizr.deqnormalize', () =>
+      expect(denormalizedData).toEqual(expectedDenormalizedData)));
+});
