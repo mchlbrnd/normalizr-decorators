@@ -61,7 +61,7 @@ const originalData: any = {
     {
       id: 324,
       commenter: {
-        id: 2,
+        id: 3,
         name: 'Nicole',
       },
     },
@@ -85,9 +85,9 @@ let expectedDenormalizedData: any;
 
 describe('Entity', () => {
   beforeEach(() => {
-    const {result, entities} = normalizedData = normalize(originalData, Article);
+    const {result, entities} = normalizedData = normalize({data: originalData, target: Article});
     expectedNormalizedData = $normalize(originalData, article);
-    denormalizedData = denormalize(result, Article, entities);
+    denormalizedData = denormalize({input: result, entities, target: Article});
     expectedDenormalizedData = $denormalize(result, article, entities);
   });
 
@@ -102,9 +102,9 @@ describe('Entity', () => {
 
 describe('Array', () => {
   beforeEach(() => {
-    const {result, entities} = normalizedData = normalize(originalData, [Article]);
+    const {result, entities} = normalizedData = normalize({data: originalData, target: [Article]});
     expectedNormalizedData = $normalize(originalData, articles);
-    denormalizedData = denormalize(result, [Article], entities);
+    denormalizedData = denormalize({input: result, entities, target: [Article]});
     expectedDenormalizedData = $denormalize(result, articles, entities);
   });
 
@@ -119,9 +119,9 @@ describe('Array', () => {
 
 describe('Union', () => {
   beforeEach(() => {
-    const {result, entities} = normalizedData = normalize(originalData, Article);
+    const {result, entities} = normalizedData = normalize({data: originalData, target: Article});
     expectedNormalizedData = $normalize(originalData, article);
-    denormalizedData = denormalize(result, Article, entities);
+    denormalizedData = denormalize({input: result, entities, target: Article});
     expectedDenormalizedData = $denormalize(result, article, entities);
   });
 
