@@ -1,9 +1,9 @@
 {
   "name": "normalizr-decorators",
-  "version": "1.0.0-alpha.5",
+  "version": "1.1.0-alpha.1",
   "description": "Schema decorators for normalizr",
   "author": {
-    "name": "Michael Wolbert", 
+    "name": "Michael Wolbert",
     "email": "michael.wolbert@gmail.com>"
   },
   "contributors": [{
